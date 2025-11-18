@@ -1,12 +1,12 @@
 import argparse
-import base64
 import sys
 import time
 from pathlib import Path
 
 import fitz  # PyMuPDF
-from openai import OpenAI
 from tqdm import tqdm
+
+from .providers import get_provider
 
 
 def pdf_to_images(pdf_path, dpi=300):
@@ -24,65 +24,16 @@ def pdf_to_images(pdf_path, dpi=300):
     return images
 
 
-def image_to_base64(image_bytes):
-    """Convert image bytes to base64 string for LM Studio."""
-    return base64.b64encode(image_bytes).decode("utf-8")
-
-
-def ocr_with_lmstudio(image_bytes, model="qwen/qwen3-vl-30b", max_retries=3):
-    """Use LM Studio vision model to extract raw text and UI information."""
-    base64_image = image_to_base64(image_bytes)
-
-    # Initialize OpenAI client pointing to LM Studio
-    client = OpenAI(base_url="http://localhost:1234/v1", api_key="lm-studio")
-
-    # Prompt focused on extracting raw text and especially UI screenshots/elements
-    prompt = """
-    Perform OCR on this image (which is a PDF page). Extract all raw text verbatim.
-    If there are UI screenshots or interface elements (like buttons, menus, windows, code snippets), describe them in detail:
-    - Identify UI components (e.g., buttons, text fields, icons).
-    - Extract any text from UI elements.
-    - Describe layouts, hierarchies, and any visible interactions.
-    Output in structured Markdown: Use # for page header, ## for sections like 'Raw Text' and 'UI Descriptions'.
-    Keep it concise but comprehensive.
-    All responses must be in French as the document is in French.
-    """
-
-    for attempt in range(max_retries):
-        try:
-            response = client.chat.completions.create(
-                model=model,
-                messages=[
-                    {
-                        "role": "user",
-                        "content": [
-                            {"type": "text", "text": prompt},
-                            {
-                                "type": "image_url",
-                                "image_url": {
-                                    "url": f"data:image/png;base64,{base64_image}"
-                                },
-                            },
-                        ],
-                    }
-                ],
-                max_tokens=2048,
-                timeout=60,  # Set appropriate timeout
-            )
-            return response.choices[0].message.content
-        except Exception as e:
-            print(f"Attempt {attempt + 1} failed: {e}")
-            if attempt < max_retries - 1:
-                time.sleep(2)  # Wait before retry
-            else:
-                raise e
-
-
 def process_pdf_to_markdown(
-    pdf_path, output_md_path, model="qwen/qwen3-vl-30b", dpi=300
+    pdf_path, output_md_path, provider_type="lm-studio", model="qwen/qwen3-vl-30b", 
+    provider_url=None, dpi=300
 ):
     """Main function to process PDF and generate Markdown with progress tracking."""
     start_time = time.perf_counter()
+    
+    # Initialize the appropriate provider
+    provider = get_provider(provider_type, base_url=provider_url)
+    
     images = pdf_to_images(pdf_path, dpi)
     total_pages = len(images)
 
@@ -98,7 +49,7 @@ def process_pdf_to_markdown(
 
         for page_num, img_bytes in images:
             page_start_time = time.perf_counter()
-            ocr_result = ocr_with_lmstudio(img_bytes, model)
+            ocr_result = provider.ocr_image(img_bytes, model)
             page_end_time = time.perf_counter()
 
             # Calculate page processing time
@@ -137,14 +88,24 @@ def process_pdf_to_markdown(
 
 def main():
     parser = argparse.ArgumentParser(
-        description="Convert PDF documents to Markdown using OCR capabilities powered by LM Studio"
+        description="Convert PDF documents to Markdown using OCR capabilities powered by various AI providers"
     )
     parser.add_argument("input_pdf", help="Input PDF file path")
     parser.add_argument("output_md", help="Output Markdown file path")
     parser.add_argument(
+        "--provider",
+        default="lm-studio",
+        choices=["lm-studio", "ollama", "llama.cpp"],
+        help="AI provider to use for OCR (default: lm-studio)"
+    )
+    parser.add_argument(
+        "--provider-url",
+        help="Custom provider URL (default depends on provider type)"
+    )
+    parser.add_argument(
         "--model",
         default="qwen/qwen3-vl-30b",
-        help="Model to use in LM Studio (default: qwen/qwen3-vl-30b)",
+        help="Model to use with the selected provider (default: qwen/qwen3-vl-30b)",
     )
     parser.add_argument(
         "--dpi", type=int, default=300, help="DPI for image conversion (default: 300)"
@@ -154,6 +115,8 @@ def main():
 
     pdf_path = args.input_pdf
     output_md_path = args.output_md
+    provider_type = args.provider
+    provider_url = args.provider_url
     model = args.model
     dpi = args.dpi
 
@@ -161,7 +124,7 @@ def main():
         print(f"Error: PDF file '{pdf_path}' does not exist")
         sys.exit(1)
 
-    process_pdf_to_markdown(pdf_path, output_md_path, model, dpi)
+    process_pdf_to_markdown(pdf_path, output_md_path, provider_type, model, provider_url, dpi)
     print(f"\nMarkdown output saved to {output_md_path}")
 
 

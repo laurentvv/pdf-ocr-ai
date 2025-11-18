@@ -3,9 +3,9 @@ requires = ["setuptools>=61.0", "wheel"]
 build-backend = "setuptools.build_meta"
 
 [project]
-name = "pdf-ocr-lmstudio"
+name = "pdf-ocr-ai"
 version = "1.0.0"
-description = "Convert PDF documents to Markdown using OCR capabilities powered by LM Studio with the qwen/qwen3-vl-30b model"
+description = "Convert PDF documents to Markdown using OCR capabilities powered by multiple AI providers (LM Studio, Ollama, llama.cpp)"
 readme = "README.md"
 authors = [
     {name = "LaurentVV"}
@@ -21,7 +21,7 @@ classifiers = [
     "Programming Language :: Python :: 3",
     "Programming Language :: Python :: 3.13",
 ]
-keywords = ["pdf", "ocr", "markdown", "lm-studio", "qwen", "vision", "ai"]
+keywords = ["pdf", "ocr", "markdown", "ai", "qwen", "vision", "lm-studio", "ollama", "llama.cpp"]
 requires-python = ">=3.13"
 dependencies = [
     "openai>=1.50.0",
@@ -34,10 +34,12 @@ Homepage = "https://github.com/laurentvv/pdf-to-md-ocr"
 Repository = "https://github.com/laurentvv/pdf-to-md-ocr"
 
 [project.scripts]
-pdf-ocr-lmstudio = "pdf_ocr_lmstudio:main"
+pdf-ocr-ai = "pdf_ocr_ai.main:main"
+pdf-ocr-lmstudio = "pdf_ocr_ai.main:main"
 
 [tool.setuptools.packages.find]
 where = ["src"]
+include = ["pdf_ocr_ai*"]
 
 [project.optional-dependencies]
 dev = [
