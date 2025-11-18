@@ -1,9 +1,11 @@
+import argparse
 import base64
 import sys
 import time
 from pathlib import Path
-from openai import OpenAI
+
 import fitz  # PyMuPDF
+from openai import OpenAI
 from tqdm import tqdm
 
 
@@ -59,13 +61,13 @@ def ocr_with_lmstudio(image_bytes, model="qwen/qwen3-vl-30b", max_retries=3):
                                 "type": "image_url",
                                 "image_url": {
                                     "url": f"data:image/png;base64,{base64_image}"
-                                }
-                            }
+                                },
+                            },
                         ],
                     }
                 ],
                 max_tokens=2048,
-                timeout=60  # Set appropriate timeout
+                timeout=60,  # Set appropriate timeout
             )
             return response.choices[0].message.content
         except Exception as e:
@@ -76,10 +78,12 @@ def ocr_with_lmstudio(image_bytes, model="qwen/qwen3-vl-30b", max_retries=3):
                 raise e
 
 
-def process_pdf_to_markdown(pdf_path, output_md_path, model="qwen/qwen3-vl-30b"):
+def process_pdf_to_markdown(
+    pdf_path, output_md_path, model="qwen/qwen3-vl-30b", dpi=300
+):
     """Main function to process PDF and generate Markdown with progress tracking."""
     start_time = time.perf_counter()
-    images = pdf_to_images(pdf_path)
+    images = pdf_to_images(pdf_path, dpi)
     total_pages = len(images)
 
     print(f"Starting OCR processing for {total_pages} pages...")
@@ -89,10 +93,7 @@ def process_pdf_to_markdown(pdf_path, output_md_path, model="qwen/qwen3-vl-30b")
 
         # Initialize progress bar
         progress_bar = tqdm(
-            total=total_pages,
-            desc="Processing pages",
-            unit="page",
-            leave=True
+            total=total_pages, desc="Processing pages", unit="page", leave=True
         )
 
         for page_num, img_bytes in images:
@@ -108,11 +109,17 @@ def process_pdf_to_markdown(pdf_path, output_md_path, model="qwen/qwen3-vl-30b")
 
             # Update progress bar with page processing info
             progress_bar.update(1)
-            current_avg_time = (time.perf_counter() - start_time) / progress_bar.n if progress_bar.n > 0 else 0
-            progress_bar.set_postfix({
-                "Page Time": f"{page_time:.2f}s",
-                "Avg Time": f"{current_avg_time:.2f}s"
-            })
+            current_avg_time = (
+                (time.perf_counter() - start_time) / progress_bar.n
+                if progress_bar.n > 0
+                else 0
+            )
+            progress_bar.set_postfix(
+                {
+                    "Page Time": f"{page_time:.2f}s",
+                    "Avg Time": f"{current_avg_time:.2f}s",
+                }
+            )
 
         progress_bar.close()
 
@@ -122,26 +129,39 @@ def process_pdf_to_markdown(pdf_path, output_md_path, model="qwen/qwen3-vl-30b")
     avg_time_per_page = total_time / total_pages
     pages_per_second = total_pages / total_time if total_time > 0 else 0
 
-    print(f"\nProcessing completed!")
+    print("\nProcessing completed!")
     print(f"Total time: {total_time:.2f} seconds")
     print(f"Average time per page: {avg_time_per_page:.2f} seconds")
     print(f"Throughput: {pages_per_second:.2f} pages/second")
 
 
 def main():
-    if len(sys.argv) != 3:
-        print("Usage: python pdf_ocr_lmstudio.py <input.pdf> <output.md>")
-        sys.exit(1)
+    parser = argparse.ArgumentParser(
+        description="Convert PDF documents to Markdown using OCR capabilities powered by LM Studio"
+    )
+    parser.add_argument("input_pdf", help="Input PDF file path")
+    parser.add_argument("output_md", help="Output Markdown file path")
+    parser.add_argument(
+        "--model",
+        default="qwen/qwen3-vl-30b",
+        help="Model to use in LM Studio (default: qwen/qwen3-vl-30b)",
+    )
+    parser.add_argument(
+        "--dpi", type=int, default=300, help="DPI for image conversion (default: 300)"
+    )
 
-    pdf_path = sys.argv[1]
-    output_md_path = sys.argv[2]
-    model = "qwen/qwen3-vl-30b"  # Change to the exact model name in LM Studio if needed
+    args = parser.parse_args()
+
+    pdf_path = args.input_pdf
+    output_md_path = args.output_md
+    model = args.model
+    dpi = args.dpi
 
     if not Path(pdf_path).exists():
         print(f"Error: PDF file '{pdf_path}' does not exist")
         sys.exit(1)
 
-    process_pdf_to_markdown(pdf_path, output_md_path, model)
+    process_pdf_to_markdown(pdf_path, output_md_path, model, dpi)
     print(f"\nMarkdown output saved to {output_md_path}")
 
 

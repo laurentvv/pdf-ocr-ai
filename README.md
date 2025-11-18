@@ -1,19 +1,34 @@
-# PDF to Markdown OCR
+<div align="center">
+
+# 📄 PDF to Markdown OCR
 
 [![GitHub](https://img.shields.io/badge/GitHub-Repository-333333?logo=github)](https://github.com/laurentvv/pdf-to-md-ocr)
+[![Python](https://img.shields.io/badge/Python-3.13+-blue?logo=python)](https://www.python.org/downloads/)
+[![uv](https://img.shields.io/badge/uv-Modern%20package%20manager-00a8ff?logo=python)](https://github.com/astral-sh/uv)
 
-This project converts PDF documents to Markdown using OCR capabilities powered by LM Studio with the qwen/qwen3-vl-30b model.
+**Convert PDF documents to Markdown using OCR capabilities powered by LM Studio**
 
-## Features
+*Powered by AI models for accurate text extraction and UI element recognition*
 
-- Extracts text from PDF documents using AI-powered OCR
-- Processes both text-based and scanned PDFs
-- Identifies and describes UI elements in document screenshots
-- Generates structured Markdown output preserving document hierarchy
-- Handles multi-page PDFs with individual page processing
-- Real-time progress tracking with percentage and ETA
-- Time calculation for individual pages and overall processing
-- Performance metrics including pages per second and average processing time
+</div>
+
+---
+
+## ✨ Features
+
+<div align="center">
+
+| Feature | Description |
+|--------|-------------|
+| 🧠 **AI-Powered OCR** | Extracts text from PDF documents using advanced AI models |
+| 🔍 **Multi-Format Support** | Processes both text-based and scanned PDFs |
+| 💻 **UI Element Recognition** | Identifies and describes UI elements in document screenshots |
+| 📝 **Structured Output** | Generates structured Markdown preserving document hierarchy |
+| 📄 **Multi-Page Handling** | Handles multi-page PDFs with individual page processing |
+| 📊 **Progress Tracking** | Real-time progress tracking with percentage and ETA |
+| ⚡ **Performance Metrics** | Time calculation and performance analytics |
+
+</div>
 
 ## Prerequisites
 
@@ -46,42 +61,86 @@ Before using the tool, you need to set up LM Studio:
 5. Ensure the "Enable remote access (allows external connections)" is unchecked for local use
 6. For best results, ensure you have sufficient VRAM allocated to the model in LM Studio
 
-## Installation
+## 🚀 Installation
 
-You can use this tool in several ways:
+For the best experience, we recommend using uv-based methods. These approaches provide better dependency management and easier usage:
 
-### Option 1: Direct execution with uvx (no installation needed)
+### 🥇 Option 1: Direct execution with uvx (Recommended - No Installation Required)
+
+Execute the tool directly from the git repository without any local installation. This is the simplest way to use the tool:
+
+<div align="center">
+
 ```bash
 uvx --from git+https://github.com/laurentvv/pdf-to-md-ocr pdf-ocr-lmstudio <input.pdf> <output.md>
 ```
 
-### Option 2: Install as a tool with uv
-This method permanently installs the tool in your environment, making it available as a command-line utility. The tool is installed in an isolated environment managed by uv, which prevents dependency conflicts with other Python projects on your system.
+</div>
 
-Benefits of this approach:
-- The command `pdf-ocr-lmstudio` becomes globally available in your terminal
-- uv manages dependencies automatically in an isolated environment
-- No need to reinstall each time you want to use the tool
-- Better dependency isolation than traditional pip installation
-- Easy to update or remove the tool later
+<details>
+<summary><b>Why this approach?</b></summary>
 
-To install and use:
+- ✅ No local installation required
+- ✅ Always uses the latest version
+- ✅ Automatic dependency resolution
+- ✅ No conflicts with other Python projects
+- ✅ Perfect for one-time usage
+
+</details>
+
+---
+
+### 🥈 Option 2: Install as a tool with uv (Recommended for Regular Use)
+
+This method permanently installs the tool in your environment, making it available as a command-line utility.
+
+<div align="center">
+
 ```bash
 uv tool install git+https://github.com/laurentvv/pdf-to-md-ocr
-# Then use: pdf-ocr-lmstudio <input.pdf> <output.md>
 ```
 
-To update the tool later:
+</div>
+
+<details>
+<summary><b>Benefits of this approach</b></summary>
+
+- ✅ Command `pdf-ocr-lmstudio` becomes globally available
+- ✅ uv manages dependencies automatically in isolated environment
+- ✅ No need to reinstall each time you use the tool
+- ✅ Better dependency isolation than traditional pip
+- ✅ Easy to update or remove the tool
+- ✅ Perfect for regular usage
+
+</details>
+
+<div align="center">
+
+**Use after installation:**
 ```bash
-uv tool install --force-reinstall git+https://github.com/laurentvv/pdf-to-md-ocr
+pdf-ocr-lmstudio <input.pdf> <output.md>
 ```
 
-To remove the tool:
-```bash
-uv tool uninstall pdf-ocr-lmstudio
-```
+</div>
 
-### Option 3: Traditional installation
+#### Tool Management Commands
+
+<div align="center">
+
+| Command | Description |
+|--------|-------------|
+| `uv tool install git+https://github.com/laurentvv/pdf-to-md-ocr` | Install the tool |
+| `uv tool install --force-reinstall git+https://github.com/laurentvv/pdf-to-md-ocr` | Update the tool |
+| `uv tool uninstall pdf-ocr-lmstudio` | Remove the tool |
+
+</div>
+
+---
+
+### 🥉 Option 3: Traditional Installation (For Development)
+
+Only recommended if you plan to modify the code or work with a virtual environment:
+
 1. Clone the repository and install the required dependencies from pyproject.toml:
    ```bash
    pip install .
@@ -93,32 +152,68 @@ uv tool uninstall pdf-ocr-lmstudio
 
 2. Start LM Studio locally and load the `qwen/qwen3-vl-30b` model
 
-### Migration from requirements.txt
-This project previously used `requirements.txt` but has migrated to the modern `pyproject.toml` standard for dependency management. The `requirements.txt` file has been removed to avoid duplication and maintenance complexity. All dependencies are now managed exclusively through `pyproject.toml`, which is the recommended approach for Python projects using modern tooling like uv.
+## 📋 Usage
 
-## Usage
+<div align="center">
 
-After traditional installation:
+For the best experience, we recommend using uv-based methods:
+
+### 🎯 Primary Command (uvx - No Installation Required)
 ```bash
-python pdf_ocr_lmstudio.py <input.pdf> <output.md>
+uvx --from git+https://github.com/laurentvv/pdf-to-md-ocr pdf-ocr-lmstudio <input.pdf> <output.md> [options]
 ```
 
-After installing with uv tool:
+### 🧰 Installed Tool (After `uv tool install`)
 ```bash
-pdf-ocr-lmstudio <input.pdf> <output.md>
+pdf-ocr-lmstudio <input.pdf> <output.md> [options]
 ```
 
-### Example:
-```bash
-# Traditional installation
-python pdf_ocr_lmstudio.py document.pdf output.md
+</div>
 
-# Or with directly executed via uvx
+---
+
+### ⚙️ Command Line Options
+
+<div align="center">
+
+| Option | Description | Default |
+|--------|-------------|---------|
+| `--model <model_name>` | Specify the model to use in LM Studio | `qwen/qwen3-vl-30b` |
+| `--dpi <value>` | Set DPI for image conversion | `300` |
+
+</div>
+
+---
+
+### 💡 Examples
+
+<div align="center">
+
+#### Quick Start
+```bash
+# Direct execution with uvx (no installation needed)
 uvx --from git+https://github.com/laurentvv/pdf-to-md-ocr pdf-ocr-lmstudio document.pdf output.md
-
-# Or if installed via uv tool
-pdf-ocr-lmstudio document.pdf output.md
 ```
+
+#### Advanced Usage
+```bash
+# With custom model using uvx
+uvx --from git+https://github.com/laurentvv/pdf-to-md-ocr pdf-ocr-lmstudio document.pdf output.md --model "llama/llama3.2-vision"
+
+# With custom DPI using uvx
+uvx --from git+https://github.com/laurentvv/pdf-to-md-ocr pdf-ocr-lmstudio document.pdf output.md --dpi 200
+
+# With both custom model and DPI using uvx
+uvx --from git+https://github.com/laurentvv/pdf-to-md-ocr pdf-ocr-lmstudio document.pdf output.md --model "llama/llama3.2-vision" --dpi 150
+```
+
+#### With Installed Tool
+```bash
+# After installing via uv tool
+pdf-ocr-lmstudio document.pdf output.md --model "llama/llama3.2-vision"
+```
+
+</div>
 
 ## Prerequisites
 
@@ -177,24 +272,35 @@ When using uv virtual environments, you may need to manually select the Python i
 5. Ensure the "Enable remote access (allows external connections)" is unchecked for local use
 6. For best results, ensure you have sufficient VRAM allocated to the model in LM Studio
 
-## How It Works
+## 🔬 How It Works
 
-1. The script converts each PDF page to a high-resolution (300 DPI) image
-2. Each image is sent to the LM Studio vision model via API
-3. The AI model performs OCR and identifies UI elements in the images
-4. The results are formatted as structured Markdown
-5. All pages are combined into a single Markdown output file
-6. Progress is displayed in real-time with estimated time remaining
-7. Performance metrics are calculated and displayed upon completion
+<div align="center">
 
-## Progress Tracking
+| Step | Description |
+|------|-------------|
+| 1️⃣ | The script converts each PDF page to a high-resolution (300 DPI) image |
+| 2️⃣ | Each image is sent to the LM Studio vision model via API |
+| 3️⃣ | The AI model performs OCR and identifies UI elements in the images |
+| 4️⃣ | The results are formatted as structured Markdown |
+| 5️⃣ | All pages are combined into a single Markdown output file |
+| 6️⃣ | Progress is displayed in real-time with estimated time remaining |
+| 7️⃣ | Performance metrics are calculated and displayed upon completion |
 
-The script includes comprehensive progress tracking:
-- Visual progress bar showing percentage complete
-- Time remaining estimate (ETA)
-- Individual page processing time
-- Average processing time per page
-- Overall performance metrics at completion
+</div>
+
+## 📊 Progress Tracking
+
+<div align="center">
+
+| Feature | Description |
+|--------|-------------|
+| 📈 **Visual Progress Bar** | Shows percentage complete in real-time |
+| ⏳ **ETA** | Time remaining estimate |
+| ⏱️ **Per-Page Timing** | Individual page processing time |
+| 📉 **Average Timing** | Average processing time per page |
+| 📋 **Performance Summary** | Overall metrics at completion |
+
+</div>
 
 ## Performance Considerations
 
@@ -214,16 +320,22 @@ The script uses the following default settings, which can be modified in the sou
 - Timeout: 60 seconds
 - Retry attempts: 3
 
-## Troubleshooting
+## 🛠️ Troubleshooting
 
-- If you get API connection errors, ensure LM Studio is running and the correct model is loaded
-- If processing fails, check that the model name in the script matches the one in LM Studio
-- For large PDFs, ensure you have at least 1GB of RAM per 50 pages
-- Consider closing other applications before processing large documents
-- If you encounter memory errors, try processing smaller PDFs
-- Very large PDFs may require more memory and processing time
-- Ensure you have tqdm installed for progress tracking functionality
-- When using uv, make sure uv is properly installed: `pip install uv`
+<div align="center">
+
+| Issue | Solution |
+|-------|----------|
+| 🔌 **API Connection Errors** | Ensure LM Studio is running and the correct model is loaded |
+| ❌ **Processing Fails** | Check that the model name in command matches the one in LM Studio |
+| 💾 **Memory Issues** | For large PDFs, ensure you have at least 1GB of RAM per 50 pages |
+| 🧠 **Model Not Found** | Verify the model name matches exactly what's available in LM Studio |
+| ⚠️ **Performance Issues** | Close other applications before processing large documents |
+| 🚫 **Memory Errors** | Try processing smaller PDFs or increase system resources |
+| 📊 **Progress Bar Missing** | Ensure tqdm is available in your Python environment |
+| 🐍 **uv Installation Issues** | Make sure uv is properly installed: `pip install uv` |
+
+</div>
 
 ## Migrating from Traditional .venv to uv
 
