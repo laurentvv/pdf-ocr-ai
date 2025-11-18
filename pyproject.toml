@@ -36,6 +36,9 @@ Repository = "https://github.com/laurentvv/pdf-to-md-ocr"
 [project.scripts]
 pdf-ocr-lmstudio = "pdf_ocr_lmstudio:main"
 
+[tool.setuptools.packages.find]
+where = ["src"]
+
 [project.optional-dependencies]
 dev = [
     "pytest>=8.0.0",
