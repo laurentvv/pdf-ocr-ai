@@ -82,9 +82,9 @@ uv tool uninstall pdf-ocr-lmstudio
 ```
 
 ### Option 3: Traditional installation
-1. Clone the repository and install the required dependencies:
+1. Clone the repository and install the required dependencies from pyproject.toml:
    ```bash
-   pip install -r requirements.txt
+   pip install .
    ```
    OR with uv:
    ```bash
@@ -93,8 +93,8 @@ uv tool uninstall pdf-ocr-lmstudio
 
 2. Start LM Studio locally and load the `qwen/qwen3-vl-30b` model
 
-### Note on requirements.txt and pyproject.toml
-This project now uses `pyproject.toml` as the primary source for dependencies and project metadata. The `requirements.txt` file is maintained for backward compatibility with older pip versions. For new installations, the `pyproject.toml` file will be used automatically by modern tools like uv.
+### Migration from requirements.txt
+This project previously used `requirements.txt` but has migrated to the modern `pyproject.toml` standard for dependency management. The `requirements.txt` file has been removed to avoid duplication and maintenance complexity. All dependencies are now managed exclusively through `pyproject.toml`, which is the recommended approach for Python projects using modern tooling like uv.
 
 ## Usage
 
