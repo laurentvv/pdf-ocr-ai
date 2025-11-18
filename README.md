@@ -15,6 +15,37 @@ This project converts PDF documents to Markdown using OCR capabilities powered b
 - Time calculation for individual pages and overall processing
 - Performance metrics including pages per second and average processing time
 
+## Prerequisites
+
+### Core Requirements
+- **Python 3.13+** (required for traditional installation methods)
+- **LM Studio** running locally with the `qwen/qwen3-vl-30b` model loaded
+- **Hardware**: Sufficient RAM and VRAM for processing PDFs (recommended: 16GB+ RAM for large documents)
+
+### Installation-Specific Requirements
+
+#### For uv-based methods (recommended):
+- **uv package manager** installed (install with: `pip install uv`)
+- LM Studio with `qwen/qwen3-vl-30b` model loaded
+
+#### For traditional methods:
+- **pip** package manager
+- Git for cloning the repository (if cloning)
+- LM Studio with `qwen/qwen3-vl-30b` model loaded
+
+### Setup LM Studio
+Before using the tool, you need to set up LM Studio:
+1. Download and install [LM Studio](https://lmstudio.ai/)
+2. In LM Studio, download the `qwen/qwen3-vl-30b` model (this is the recommended model for optimal results)
+3. Start the local server with the model loaded:
+   - Open LM Studio
+   - Select the `qwen/qwen3-vl-30b` model from your model list
+   - Click on the "Load" button to load the model
+   - Click on the "Start Server" button to start the local API server
+4. The script will automatically connect to the API at `http://localhost:1234/v1`
+5. Ensure the "Enable remote access (allows external connections)" is unchecked for local use
+6. For best results, ensure you have sufficient VRAM allocated to the model in LM Studio
+
 ## Installation
 
 You can use this tool in several ways:
@@ -25,9 +56,29 @@ uvx --from git+https://github.com/laurentvv/pdf-to-md-ocr pdf-ocr-lmstudio <inpu
 ```
 
 ### Option 2: Install as a tool with uv
+This method permanently installs the tool in your environment, making it available as a command-line utility. The tool is installed in an isolated environment managed by uv, which prevents dependency conflicts with other Python projects on your system.
+
+Benefits of this approach:
+- The command `pdf-ocr-lmstudio` becomes globally available in your terminal
+- uv manages dependencies automatically in an isolated environment
+- No need to reinstall each time you want to use the tool
+- Better dependency isolation than traditional pip installation
+- Easy to update or remove the tool later
+
+To install and use:
 ```bash
 uv tool install git+https://github.com/laurentvv/pdf-to-md-ocr
 # Then use: pdf-ocr-lmstudio <input.pdf> <output.md>
+```
+
+To update the tool later:
+```bash
+uv tool install --force-reinstall git+https://github.com/laurentvv/pdf-to-md-ocr
+```
+
+To remove the tool:
+```bash
+uv tool uninstall pdf-ocr-lmstudio
 ```
 
 ### Option 3: Traditional installation
@@ -73,8 +124,9 @@ pdf-ocr-lmstudio document.pdf output.md
 
 - Python 3.13+ (for traditional installation)
 - uv (for uv installation methods)
-- LM Studio running locally with qwen/qwen3-vl-30b model loaded
-- The qwen/qwen3-vl-30b model must be available in LM Studio
+- LM Studio running locally with the qwen/qwen3-vl-30b model loaded
+- The qwen/qwen3-vl-30b model must be available in LM Studio (see Setup LM Studio section below)
+- Local LM Studio server running with the model loaded (default API endpoint: http://localhost:1234/v1)
 
 ## Development Setup
 
@@ -115,9 +167,15 @@ When using uv virtual environments, you may need to manually select the Python i
 ## Setup LM Studio
 
 1. Download and install [LM Studio](https://lmstudio.ai/)
-2. In LM Studio, download the `qwen/qwen3-vl-30b` model
-3. Start the local server with the model loaded
+2. In LM Studio, download the `qwen/qwen3-vl-30b` model (this is the recommended model for optimal results)
+3. Start the local server with the model loaded:
+   - Open LM Studio
+   - Select the `qwen/qwen3-vl-30b` model from your model list
+   - Click on the "Load" button to load the model
+   - Click on the "Start Server" button to start the local API server
 4. The script will automatically connect to the API at `http://localhost:1234/v1`
+5. Ensure the "Enable remote access (allows external connections)" is unchecked for local use
+6. For best results, ensure you have sufficient VRAM allocated to the model in LM Studio
 
 ## How It Works
 

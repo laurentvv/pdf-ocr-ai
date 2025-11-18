@@ -15,6 +15,37 @@ Ce projet convertit des documents PDF en Markdown en utilisant les capacités OC
 - Calcul du temps pour les pages individuelles et le traitement global
 - Métriques de performance incluant les pages par seconde et le temps moyen de traitement
 
+## Prérequis
+
+### Prérequis de base
+- **Python 3.13+** (requis pour les méthodes d'installation traditionnelles)
+- **LM Studio** exécuté localement avec le modèle `qwen/qwen3-vl-30b` chargé
+- **Matériel** : RAM et VRAM suffisants pour le traitement des PDF (recommandé : 16 Go+ de RAM pour les documents volumineux)
+
+### Prérequis spécifiques à l'installation
+
+#### Pour les méthodes basées sur uv (recommandé) :
+- **Gestionnaire de paquets uv** installé (installez avec : `pip install uv`)
+- LM Studio avec le modèle `qwen/qwen3-vl-30b` chargé
+
+#### Pour les méthodes traditionnelles :
+- **Gestionnaire de paquets pip**
+- Git pour cloner le dépôt (si vous clonez)
+- LM Studio avec le modèle `qwen/qwen3-vl-30b` chargé
+
+### Configuration de LM Studio
+Avant d'utiliser l'outil, vous devez configurer LM Studio :
+1. Téléchargez et installez [LM Studio](https://lmstudio.ai/)
+2. Dans LM Studio, téléchargez le modèle `qwen/qwen3-vl-30b` (c'est le modèle recommandé pour des résultats optimaux)
+3. Démarrez le serveur local avec le modèle chargé :
+   - Ouvrez LM Studio
+   - Sélectionnez le modèle `qwen/qwen3-vl-30b` dans votre liste de modèles
+   - Cliquez sur le bouton "Load" pour charger le modèle
+   - Cliquez sur le bouton "Start Server" pour démarrer le serveur API local
+4. Le script se connectera automatiquement à l'API à l'adresse `http://localhost:1234/v1`
+5. Assurez-vous que l'option "Enable remote access (allows external connections)" est décochée pour une utilisation locale
+6. Pour de meilleurs résultats, assurez-vous d'avoir suffisamment de VRAM allouée au modèle dans LM Studio
+
 ## Installation
 
 Vous pouvez utiliser cet outil de plusieurs manières :
@@ -25,9 +56,29 @@ uvx --from git+https://github.com/laurentvv/pdf-to-md-ocr pdf-ocr-lmstudio <inpu
 ```
 
 ### Option 2 : Installation en tant qu'outil avec uv
+Cette méthode installe définitivement l'outil dans votre environnement, le rendant disponible comme utilitaire en ligne de commande. L'outil est installé dans un environnement isolé géré par uv, ce qui empêche les conflits de dépendances avec d'autres projets Python sur votre système.
+
+Avantages de cette approche :
+- La commande `pdf-ocr-lmstudio` devient disponible globalement dans votre terminal
+- uv gère automatiquement les dépendances dans un environnement isolé
+- Pas besoin de réinstaller à chaque fois que vous voulez utiliser l'outil
+- Meilleure isolation des dépendances qu'avec l'installation pip traditionnelle
+- Facilité de mise à jour ou de suppression de l'outil ultérieurement
+
+Pour installer et utiliser :
 ```bash
 uv tool install git+https://github.com/laurentvv/pdf-to-md-ocr
 # Puis utilisez : pdf-ocr-lmstudio <input.pdf> <output.md>
+```
+
+Pour mettre à jour l'outil ultérieurement :
+```bash
+uv tool install --force-reinstall git+https://github.com/laurentvv/pdf-to-md-ocr
+```
+
+Pour supprimer l'outil :
+```bash
+uv tool uninstall pdf-ocr-lmstudio
 ```
 
 ### Option 3 : Installation traditionnelle
@@ -74,7 +125,8 @@ pdf-ocr-lmstudio document.pdf output.md
 - Python 3.13+ (pour l'installation traditionnelle)
 - uv (pour les méthodes d'installation uv)
 - LM Studio exécuté localement avec le modèle qwen/qwen3-vl-30b chargé
-- Le modèle qwen/qwen3-vl-30b doit être disponible dans LM Studio
+- Le modèle qwen/qwen3-vl-30b doit être disponible dans LM Studio (voir la section Configuration de LM Studio ci-dessous)
+- Serveur LM Studio local en cours d'exécution avec le modèle chargé (point de terminaison API par défaut : http://localhost:1234/v1)
 
 ## Configuration du développement
 
@@ -115,9 +167,15 @@ Lorsque vous utilisez des environnements virtuels uv, vous devrez peut-être sé
 ## Configuration de LM Studio
 
 1. Téléchargez et installez [LM Studio](https://lmstudio.ai/)
-2. Dans LM Studio, téléchargez le modèle `qwen/qwen3-vl-30b`
-3. Démarrez le serveur local avec le modèle chargé
+2. Dans LM Studio, téléchargez le modèle `qwen/qwen3-vl-30b` (c'est le modèle recommandé pour des résultats optimaux)
+3. Démarrez le serveur local avec le modèle chargé :
+   - Ouvrez LM Studio
+   - Sélectionnez le modèle `qwen/qwen3-vl-30b` dans votre liste de modèles
+   - Cliquez sur le bouton "Load" pour charger le modèle
+   - Cliquez sur le bouton "Start Server" pour démarrer le serveur API local
 4. Le script se connectera automatiquement à l'API à l'adresse `http://localhost:1234/v1`
+5. Assurez-vous que l'option "Enable remote access (allows external connections)" est décochée pour une utilisation locale
+6. Pour de meilleurs résultats, assurez-vous d'avoir suffisamment de VRAM allouée au modèle dans LM Studio
 
 ## Fonctionnement
 
