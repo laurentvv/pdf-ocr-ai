@@ -27,6 +27,11 @@ venv/
 env/
 ENV/
 
+# uv-specific
+uv-venv/
+.uv/
+.uv-cache/
+
 # IDE
 .vscode/
 .idea/

@@ -1,0 +1,47 @@
+[build-system]
+requires = ["setuptools>=61.0", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "pdf-ocr-lmstudio"
+version = "1.0.0"
+description = "Convert PDF documents to Markdown using OCR capabilities powered by LM Studio with the qwen/qwen3-vl-30b model"
+readme = "README.md"
+authors = [
+    {name = "LaurentVV"}
+]
+maintainers = [
+    {name = "LaurentVV"}
+]
+license = {text = "MIT"}
+classifiers = [
+    "Development Status :: 4 - Beta",
+    "Intended Audience :: Developers",
+    "License :: OSI Approved :: MIT License",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.13",
+]
+keywords = ["pdf", "ocr", "markdown", "lm-studio", "qwen", "vision", "ai"]
+requires-python = ">=3.13"
+dependencies = [
+    "openai>=1.50.0",
+    "PyMuPDF>=1.23.0",
+    "tqdm>=4.66.0"
+]
+
+[project.urls]
+Homepage = "https://github.com/laurentvv/pdf-to-md-ocr"
+Repository = "https://github.com/laurentvv/pdf-to-md-ocr"
+
+[project.scripts]
+pdf-ocr-lmstudio = "pdf_ocr_lmstudio:main"
+
+[project.optional-dependencies]
+dev = [
+    "pytest>=8.0.0",
+    "black>=23.0.0",
+    "flake8>=6.0.0",
+    "mypy>=1.0.0",
+    "pre-commit>=3.0.0",
+    "pytest-cov>=4.0.0",
+]

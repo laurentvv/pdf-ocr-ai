@@ -15,31 +15,102 @@ Ce projet convertit des documents PDF en Markdown en utilisant les capacités OC
 - Calcul du temps pour les pages individuelles et le traitement global
 - Métriques de performance incluant les pages par seconde et le temps moyen de traitement
 
-## Prérequis
-
-- Python 3.13+
-- LM Studio exécuté localement avec le modèle qwen/qwen3-vl-30b chargé
-- Le modèle qwen/qwen3-vl-30b doit être disponible dans LM Studio
-
 ## Installation
 
-1. Installez les dépendances requises :
+Vous pouvez utiliser cet outil de plusieurs manières :
+
+### Option 1 : Exécution directe avec uvx (pas d'installation nécessaire)
+```bash
+uvx --from git+https://github.com/laurentvv/pdf-to-md-ocr pdf-ocr-lmstudio <input.pdf> <output.md>
+```
+
+### Option 2 : Installation en tant qu'outil avec uv
+```bash
+uv tool install git+https://github.com/laurentvv/pdf-to-md-ocr
+# Puis utilisez : pdf-ocr-lmstudio <input.pdf> <output.md>
+```
+
+### Option 3 : Installation traditionnelle
+1. Clonez le dépôt et installez les dépendances requises :
    ```bash
    pip install -r requirements.txt
    ```
+   OU avec uv :
+   ```bash
+   uv sync
+   ```
 
-2. Démarrer LM Studio localement et charger le modèle `qwen/qwen3-vl-30b`
+2. Démarrez LM Studio localement et chargez le modèle `qwen/qwen3-vl-30b`
+
+### Note sur requirements.txt et pyproject.toml
+Ce projet utilise maintenant `pyproject.toml` comme source principale pour les dépendances et les métadonnées du projet. Le fichier `requirements.txt` est maintenu pour des raisons de compatibilité avec les anciennes versions de pip. Pour les nouvelles installations, le fichier `pyproject.toml` sera utilisé automatiquement par des outils modernes comme uv.
 
 ## Utilisation
 
+Après installation traditionnelle :
 ```bash
 python pdf_ocr_lmstudio.py <input.pdf> <output.md>
 ```
 
+Après installation avec l'outil uv :
+```bash
+pdf-ocr-lmstudio <input.pdf> <output.md>
+```
+
 ### Exemple :
 ```bash
+# Installation traditionnelle
 python pdf_ocr_lmstudio.py document.pdf output.md
+
+# Ou exécuté directement via uvx
+uvx --from git+https://github.com/laurentvv/pdf-to-md-ocr pdf-ocr-lmstudio document.pdf output.md
+
+# Ou si installé via l'outil uv
+pdf-ocr-lmstudio document.pdf output.md
 ```
+
+## Prérequis
+
+- Python 3.13+ (pour l'installation traditionnelle)
+- uv (pour les méthodes d'installation uv)
+- LM Studio exécuté localement avec le modèle qwen/qwen3-vl-30b chargé
+- Le modèle qwen/qwen3-vl-30b doit être disponible dans LM Studio
+
+## Configuration du développement
+
+### Configuration de l'environnement virtuel (Méthode traditionnelle)
+1. Créez un environnement virtuel :
+   ```bash
+   python -m venv .venv
+   ```
+2. Activez l'environnement :
+   - Windows : `.venv\Scripts\activate`
+   - macOS/Linux : `source .venv/bin/activate`
+3. Installez les dépendances :
+   ```bash
+   pip install -e .
+   ```
+
+### Configuration de l'environnement virtuel (Méthode uv)
+1. Créez un environnement virtuel avec uv :
+   ```bash
+   uv venv
+   ```
+2. Activez l'environnement (uv utilisera sa propre gestion d'environnement virtuel)
+3. Installez les dépendances :
+   ```bash
+   uv sync
+   ```
+
+### Utilisateurs de VSCode sur Windows
+Lorsque vous utilisez des environnements virtuels uv, vous devrez peut-être sélectionner manuellement l'interpréteur Python dans VSCode :
+1. Ouvrez VSCode dans le répertoire du projet
+2. Appuyez sur `Ctrl+Maj+P` pour ouvrir la palette de commandes
+3. Tapez "Python: Sélectionner l'interpréteur" et sélectionnez-le
+4. Choisissez l'interpréteur de votre environnement virtuel uv
+   - Vous pouvez le localiser en exécutant `uv venv --path` pour voir l'emplacement de l'environnement
+   - L'interpréteur Python se trouve généralement dans `.venv\Scripts\python.exe` (lors de l'utilisation de `uv venv .venv`) ou dans un chemin comme `%USERPROFILE%\AppData\Local\uv\...` lors de l'utilisation d'environnements uv globaux (Windows)
+   - Pour macOS/Linux, l'interpréteur Python se trouve dans `bin/python`
 
 ## Configuration de LM Studio
 
@@ -67,12 +138,47 @@ Le script inclut un suivi de progression complet :
 - Temps moyen de traitement par page
 - Métriques de performance globales à l'achèvement
 
+## Considérations de performance
+
+- Les PDF volumineux (>100 pages) peuvent nécessiter une quantité substantielle de mémoire (plusieurs Go)
+- Le temps de traitement est d'environ 10-30 secondes par page selon la complexité
+- Pour les documents volumineux, envisagez de les traiter par lots ou d'utiliser une machine avec suffisamment de RAM
+- La vitesse de traitement dépend de la complexité du document et du matériel
+- Les images haute DPI (300 DPI) offrent une meilleure précision OCR mais prennent plus de temps
+- La première exécution peut être plus lente car les modèles sont chargés en mémoire
+
+## Configuration avancée
+
+Le script utilise les paramètres par défaut suivants, qui peuvent être modifiés dans le code source :
+- DPI : 300 (pour la qualité de l'image)
+- Modèle : qwen/qwen3-vl-30b (modifiable dans le code source)
+- Tokens max : 2048
+- Délai d'attente : 60 secondes
+- Tentatives de réessai : 3
+
 ## Dépannage
 
 - Si vous obtenez des erreurs de connexion à l'API, assurez-vous que LM Studio est en cours d'exécution et que le bon modèle est chargé
 - Si le traitement échoue, vérifiez que le nom du modèle dans le script correspond à celui dans LM Studio
+- Pour les PDF volumineux, assurez-vous d'avoir au moins 1 Go de RAM par 50 pages
+- Envisagez de fermer d'autres applications avant de traiter des documents volumineux
+- Si vous rencontrez des erreurs de mémoire, essayez de traiter des PDF plus petits
 - Les PDF très volumineux peuvent nécessiter plus de mémoire et de temps de traitement
 - Assurez-vous que tqdm est installé pour la fonctionnalité de suivi de progression
+- Lors de l'utilisation de uv, assurez-vous que uv est correctement installé : `pip install uv`
+
+## Migration depuis le .venv traditionnel vers uv
+
+Si vous avez un répertoire `.venv` existant et que vous souhaitez passer à la gestion d'environnement basée sur uv :
+
+1. Sauvegardez votre configuration actuelle si nécessaire
+2. Conservez votre `.venv` existant si vous souhaitez y revenir plus tard
+3. Utilisez plutôt les commandes uv :
+   ```bash
+   uv venv  # Crée un nouvel environnement géré par uv
+   uv sync  # Installe les dépendances avec uv
+   ```
+4. Lors de l'activation des environnements, utilisez les commandes uv ou sélectionnez manuellement l'interpréteur dans votre IDE
 
 ## Dépendances
 
