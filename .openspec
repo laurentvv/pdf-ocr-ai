@@ -1,0 +1,14 @@
+# OpenSpec Configuration
+# Defines the structure and location of specifications in this project
+
+version: 0.1.0
+
+paths:
+  changes: openspec/changes
+  specs: openspec/specs
+  archive: openspec/changes/archive
+
+commands:
+  proposal: .qwen/commands/openspec-proposal.md
+  apply: .qwen/commands/openspec-apply.md
+  archive: .qwen/commands/openspec-archive.md
