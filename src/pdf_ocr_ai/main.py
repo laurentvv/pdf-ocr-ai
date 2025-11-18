@@ -1,7 +1,14 @@
+"""
+PDF to Markdown OCR - Main processing module
+
+This module provides functions for converting PDF files to Markdown format
+using AI-powered OCR from multiple providers.
+"""
 import argparse
 import sys
 import time
 from pathlib import Path
+from typing import List, Tuple
 
 import fitz  # PyMuPDF
 from tqdm import tqdm
@@ -9,8 +16,16 @@ from tqdm import tqdm
 from .providers import get_provider
 
 
-def pdf_to_images(pdf_path, dpi=300):
-    """Convert PDF pages to PNG images in memory."""
+def pdf_to_images(pdf_path: str, dpi: int = 300) -> List[Tuple[int, bytes]]:
+    """Convert PDF pages to PNG images in memory.
+
+    Args:
+        pdf_path: Path to the input PDF file
+        dpi: Resolution for image conversion (default: 300)
+
+    Returns:
+        List of tuples containing (page_number, image_bytes) for each page
+    """
     doc = fitz.open(pdf_path)
     images = []
     for page_num in range(len(doc)):
@@ -25,15 +40,27 @@ def pdf_to_images(pdf_path, dpi=300):
 
 
 def process_pdf_to_markdown(
-    pdf_path, output_md_path, provider_type="lm-studio", model="qwen/qwen3-vl-30b", 
-    provider_url=None, dpi=300
-):
-    """Main function to process PDF and generate Markdown with progress tracking."""
+    pdf_path: str, output_md_path: str, provider_type: str = "lm-studio",
+    model: str = "qwen/qwen3-vl-30b", provider_url: str = None, dpi: int = 300
+) -> None:
+    """Main function to process PDF and generate Markdown with progress tracking.
+
+    Args:
+        pdf_path: Path to the input PDF file
+        output_md_path: Path for the output Markdown file
+        provider_type: AI provider to use (default: "lm-studio")
+        model: Model to use with the provider (default: "qwen/qwen3-vl-30b")
+        provider_url: Custom provider URL (default: None)
+        dpi: Resolution for image conversion (default: 300)
+
+    Returns:
+        None (writes output to specified file)
+    """
     start_time = time.perf_counter()
-    
+
     # Initialize the appropriate provider
     provider = get_provider(provider_type, base_url=provider_url)
-    
+
     images = pdf_to_images(pdf_path, dpi)
     total_pages = len(images)
 
@@ -86,7 +113,11 @@ def process_pdf_to_markdown(
     print(f"Throughput: {pages_per_second:.2f} pages/second")
 
 
-def main():
+def main() -> None:
+    """Main entry point for the PDF OCR AI application.
+
+    Parses command line arguments and processes the PDF file using the specified AI provider.
+    """
     parser = argparse.ArgumentParser(
         description="Convert PDF documents to Markdown using OCR capabilities powered by various AI providers"
     )

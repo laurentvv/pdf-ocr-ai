@@ -64,5 +64,4 @@ And the application exits with a non-zero status
 
 ## REMOVED Requirements
 
-### Requirement: None
 No existing requirements are removed, ensuring backward compatibility.
