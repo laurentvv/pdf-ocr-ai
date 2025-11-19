@@ -2,7 +2,7 @@
 
 # 📄 PDF to Markdown OCR
 
-[![GitHub](https://img.shields.io/badge/GitHub-Repository-333333?logo=github)](https://github.com/laurentvv/pdf-to-md-ocr)
+[![GitHub](https://img.shields.io/badge/GitHub-Repository-333333?logo=github)](https://github.com/laurentvv/pdf-ocr-ai)
 [![Python](https://img.shields.io/badge/Python-3.13+-blue?logo=python)](https://www.python.org/downloads/)
 [![uv](https://img.shields.io/badge/uv-Modern%20package%20manager-00a8ff?logo=python)](https://github.com/astral-sh/uv)
 
@@ -61,7 +61,7 @@ Exécutez l'outil directement depuis le dépôt git sans aucune installation loc
 <div align="center">
 
 ```bash
-uvx --from git+https://github.com/laurentvv/pdf-to-md-ocr pdf-ocr-ai <input.pdf> <output.md>
+uvx --from git+https://github.com/laurentvv/pdf-ocr-ai pdf-ocr-ai <input.pdf> <output.md>
 ```
 
 </div>
@@ -86,7 +86,7 @@ Cette méthode installe définitivement l'outil dans votre environnement, le ren
 <div align="center">
 
 ```bash
-uv tool install git+https://github.com/laurentvv/pdf-to-md-ocr
+uv tool install git+https://github.com/laurentvv/pdf-ocr-ai
 ```
 
 </div>
@@ -118,25 +118,26 @@ pdf-ocr-ai <input.pdf> <output.md>
 
 | Commande | Description |
 |--------|-------------|
-| `uv tool install git+https://github.com/laurentvv/pdf-to-md-ocr` | Installer l'outil |
-| `uv tool install --force-reinstall git+https://github.com/laurentvv/pdf-to-md-ocr` | Mettre à jour l'outil |
+| `uv tool install git+https://github.com/laurentvv/pdf-ocr-ai` | Installer l'outil |
+| `uv tool install --force-reinstall git+https://github.com/laurentvv/pdf-ocr-ai` | Mettre à jour l'outil |
 | `uv tool uninstall pdf-ocr-ai` | Supprimer l'outil |
 
 </div>
 
 ---
 
-### 🥉 Option 3 : Installation traditionnelle (Pour le développement)
+### 🥉 Option 3 : Installation moderne avec uv (Recommandée pour le développement)
 
-Seulement recommandée si vous prévoyez de modifier le code ou de travailler avec un environnement virtuel :
+Hautement recommandée si vous prévoyez de modifier le code ou de travailler avec un environnement virtuel.
+uv fournit une meilleure gestion des dépendances, une installation plus rapide et une isolation améliorée :
 
-1. Clonez le dépôt et installez les dépendances requises depuis pyproject.toml :
-   ```bash
-   pip install .
-   ```
-   OU avec uv :
+1. Clonez le dépôt et installez les dépendances requises depuis pyproject.toml en utilisant uv :
    ```bash
    uv sync
+   ```
+   OU alternativement avec pip :
+   ```bash
+   pip install .
    ```
 
 ## 📋 Utilisation
@@ -147,7 +148,7 @@ Pour la meilleure expérience, nous recommandons d'utiliser les méthodes basée
 
 ### 🎯 Commande principale (uvx - Aucune Installation Requise)
 ```bash
-uvx --from git+https://github.com/laurentvv/pdf-to-md-ocr pdf-ocr-ai <input.pdf> <output.md> [options]
+uvx --from git+https://github.com/laurentvv/pdf-ocr-ai pdf-ocr-ai <input.pdf> <output.md> [options]
 ```
 
 ### 🧰 Outil installé (Après `uv tool install`)
@@ -155,11 +156,6 @@ uvx --from git+https://github.com/laurentvv/pdf-to-md-ocr pdf-ocr-ai <input.pdf>
 pdf-ocr-ai <input.pdf> <output.md> [options]
 ```
 
-### 🔄 Compatibilité descendante
-L'outil prend également en charge l'ancien nom de commande pour la compatibilité descendante :
-```bash
-pdf-ocr-lmstudio <input.pdf> <output.md> [options]
-```
 
 </div>
 
@@ -187,28 +183,28 @@ pdf-ocr-lmstudio <input.pdf> <output.md> [options]
 #### Démarrage rapide avec LM Studio
 ```bash
 # Exécution directe avec uvx (pas d'installation nécessaire)
-uvx --from git+https://github.com/laurentvv/pdf-to-md-ocr pdf-ocr-ai document.pdf output.md
+uvx --from git+https://github.com/laurentvv/pdf-ocr-ai pdf-ocr-ai document.pdf output.md
 ```
 
 #### Utilisation d'Ollama
 ```bash
 # Avec le fournisseur Ollama
-uvx --from git+https://github.com/laurentvv/pdf-to-md-ocr pdf-ocr-ai document.pdf output.md --provider ollama --model llava
+uvx --from git+https://github.com/laurentvv/pdf-ocr-ai pdf-ocr-ai document.pdf output.md --provider ollama --model llava
 
 # Avec une URL Ollama personnalisée
-uvx --from git+https://github.com/laurentvv/pdf-to-md-ocr pdf-ocr-ai document.pdf output.md --provider ollama --provider-url http://localhost:11434/v1 --model llava
+uvx --from git+https://github.com/laurentvv/pdf-ocr-ai pdf-ocr-ai document.pdf output.md --provider ollama --provider-url http://localhost:11434/v1 --model llava
 ```
 
 #### Utilisation de llama.cpp
 ```bash
 # Avec le fournisseur llama.cpp
-uvx --from git+https://github.com/laurentvv/pdf-to-md-ocr pdf-ocr-ai document.pdf output.md --provider "llama.cpp" --model qwen2-vl
+uvx --from git+https://github.com/laurentvv/pdf-ocr-ai pdf-ocr-ai document.pdf output.md --provider "llama.cpp" --model qwen2-vl
 ```
 
 #### Utilisation avancée
 ```bash
 # Avec DPI personnalisé
-uvx --from git+https://github.com/laurentvv/pdf-to-md-ocr pdf-ocr-ai document.pdf output.md --provider ollama --model llava --dpi 200
+uvx --from git+https://github.com/laurentvv/pdf-ocr-ai pdf-ocr-ai document.pdf output.md --provider ollama --model llava --dpi 200
 
 # Utilisation de l'ancien nom de commande (compatibilité descendante)
 pdf-ocr-lmstudio document.pdf output.md --provider ollama --model llava

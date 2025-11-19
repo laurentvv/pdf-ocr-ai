@@ -30,8 +30,8 @@ dependencies = [
 ]
 
 [project.urls]
-Homepage = "https://github.com/laurentvv/pdf-to-md-ocr"
-Repository = "https://github.com/laurentvv/pdf-to-md-ocr"
+Homepage = "https://github.com/laurentvv/pdf-ocr-ai"
+Repository = "https://github.com/laurentvv/pdf-ocr-ai"
 
 [project.scripts]
 pdf-ocr-ai = "pdf_ocr_ai.main:main"
