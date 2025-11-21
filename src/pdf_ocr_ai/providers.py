@@ -29,7 +29,7 @@ class ProviderConfig:
     """Configuration constants for AI providers."""
 
     DEFAULT_RETRY_COUNT: int = 3
-    DEFAULT_TIMEOUT: int = 120
+    DEFAULT_TIMEOUT: int = 600
     DEFAULT_MAX_TOKENS: int = 2048
     DEFAULT_LM_STUDIO_URL: str = "http://localhost:1234/v1"
     DEFAULT_OLLAMA_URL: str = "http://localhost:11434/v1"
