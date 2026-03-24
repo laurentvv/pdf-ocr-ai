@@ -31,7 +31,9 @@ def pdf_to_images(pdf_path: str, dpi: int = 300) -> Iterator[Tuple[int, bytes]]:
     try:
         for page_num in range(len(doc)):
             page = doc.load_page(page_num)
-            pix = page.get_pixmap(dpi=dpi)  # Higher DPI for better OCR accuracy
+            pix = page.get_pixmap(
+                dpi=dpi, alpha=False
+            )  # Higher DPI for better OCR accuracy
             yield (page_num + 1, pix.tobytes("png"))
     finally:
         doc.close()
