@@ -4,11 +4,12 @@ PDF to Markdown OCR - Main processing module
 This module provides functions for converting PDF files to Markdown format
 using AI-powered OCR from multiple providers.
 """
+
 import argparse
 import sys
 import time
 from pathlib import Path
-from typing import List, Tuple
+from typing import Iterator, Tuple
 
 import fitz  # PyMuPDF
 from tqdm import tqdm
@@ -16,32 +17,33 @@ from tqdm import tqdm
 from .providers import get_provider
 
 
-def pdf_to_images(pdf_path: str, dpi: int = 300) -> List[Tuple[int, bytes]]:
+def pdf_to_images(pdf_path: str, dpi: int = 300) -> Iterator[Tuple[int, bytes]]:
     """Convert PDF pages to PNG images in memory.
 
     Args:
         pdf_path: Path to the input PDF file
         dpi: Resolution for image conversion (default: 300)
 
-    Returns:
-        List of tuples containing (page_number, image_bytes) for each page
+    Yields:
+        Tuples containing (page_number, image_bytes) for each page
     """
     doc = fitz.open(pdf_path)
-    images = []
-    for page_num in range(len(doc)):
-        page = doc.load_page(page_num)
-        pix = page.get_pixmap(dpi=dpi)  # Higher DPI for better OCR accuracy
-        img_data = pix.tobytes("png")
-        images.append(
-            (page_num + 1, img_data)
-        )  # Page number (1-indexed) and image bytes
-    doc.close()
-    return images
+    try:
+        for page_num in range(len(doc)):
+            page = doc.load_page(page_num)
+            pix = page.get_pixmap(dpi=dpi)  # Higher DPI for better OCR accuracy
+            yield (page_num + 1, pix.tobytes("png"))
+    finally:
+        doc.close()
 
 
 def process_pdf_to_markdown(
-    pdf_path: str, output_md_path: str, provider_type: str = "lm-studio",
-    model: str = "qwen/qwen3-vl-30b", provider_url: str = None, dpi: int = 300
+    pdf_path: str,
+    output_md_path: str,
+    provider_type: str = "lm-studio",
+    model: str = "qwen/qwen3-vl-30b",
+    provider_url: str = None,
+    dpi: int = 300,
 ) -> None:
     """Main function to process PDF and generate Markdown with progress tracking.
 
@@ -61,8 +63,9 @@ def process_pdf_to_markdown(
     # Initialize the appropriate provider
     provider = get_provider(provider_type, base_url=provider_url)
 
+    with fitz.open(pdf_path) as doc:
+        total_pages = len(doc)
     images = pdf_to_images(pdf_path, dpi)
-    total_pages = len(images)
 
     print(f"Starting OCR processing for {total_pages} pages...")
 
@@ -127,11 +130,10 @@ def main() -> None:
         "--provider",
         default="lm-studio",
         choices=["lm-studio", "ollama", "llama.cpp"],
-        help="AI provider to use for OCR (default: lm-studio)"
+        help="AI provider to use for OCR (default: lm-studio)",
     )
     parser.add_argument(
-        "--provider-url",
-        help="Custom provider URL (default depends on provider type)"
+        "--provider-url", help="Custom provider URL (default depends on provider type)"
     )
     parser.add_argument(
         "--model",
@@ -155,7 +157,9 @@ def main() -> None:
         print(f"Error: PDF file '{pdf_path}' does not exist")
         sys.exit(1)
 
-    process_pdf_to_markdown(pdf_path, output_md_path, provider_type, model, provider_url, dpi)
+    process_pdf_to_markdown(
+        pdf_path, output_md_path, provider_type, model, provider_url, dpi
+    )
     print(f"\nMarkdown output saved to {output_md_path}")
 
 
