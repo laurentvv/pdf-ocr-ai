@@ -4,6 +4,7 @@ PDF to Markdown OCR - Main processing module
 This module provides functions for converting PDF files to Markdown format
 using AI-powered OCR from multiple providers.
 """
+
 import argparse
 import sys
 import time
@@ -38,8 +39,12 @@ def pdf_to_images(pdf_path: str, dpi: int = 300) -> Generator[Tuple[int, bytes],
 
 
 def process_pdf_to_markdown(
-    pdf_path: str, output_md_path: str, provider_type: str = "lm-studio",
-    model: str = "qwen/qwen3-vl-30b", provider_url: str = None, dpi: int = 300
+    pdf_path: str,
+    output_md_path: str,
+    provider_type: str = "lm-studio",
+    model: str = "qwen/qwen3-vl-30b",
+    provider_url: str = None,
+    dpi: int = 300,
 ) -> None:
     """Main function to process PDF and generate Markdown with progress tracking.
 
@@ -76,32 +81,33 @@ def process_pdf_to_markdown(
             total=total_pages, desc="Processing pages", unit="page", leave=True
         )
 
-        for page_num, img_bytes in images:
-            page_start_time = time.perf_counter()
-            ocr_result = provider.ocr_image(img_bytes, model)
-            page_end_time = time.perf_counter()
+        try:
+            for page_num, img_bytes in images:
+                page_start_time = time.perf_counter()
+                ocr_result = provider.ocr_image(img_bytes, model)
+                page_end_time = time.perf_counter()
 
-            # Calculate page processing time
-            page_time = page_end_time - page_start_time
+                # Calculate page processing time
+                page_time = page_end_time - page_start_time
 
-            md_file.write(f"## Page {page_num}\n\n")
-            md_file.write(ocr_result + "\n\n---\n\n")
+                md_file.write(f"## Page {page_num}\n\n")
+                md_file.write(ocr_result + "\n\n---\n\n")
 
-            # Update progress bar with page processing info
-            progress_bar.update(1)
-            current_avg_time = (
-                (time.perf_counter() - start_time) / progress_bar.n
-                if progress_bar.n > 0
-                else 0
-            )
-            progress_bar.set_postfix(
-                {
-                    "Page Time": f"{page_time:.2f}s",
-                    "Avg Time": f"{current_avg_time:.2f}s",
-                }
-            )
-
-        progress_bar.close()
+                # Update progress bar with page processing info
+                progress_bar.update(1)
+                current_avg_time = (
+                    (time.perf_counter() - start_time) / progress_bar.n
+                    if progress_bar.n > 0
+                    else 0
+                )
+                progress_bar.set_postfix(
+                    {
+                        "Page Time": f"{page_time:.2f}s",
+                        "Avg Time": f"{current_avg_time:.2f}s",
+                    }
+                )
+        finally:
+            progress_bar.close()
 
     total_time = time.perf_counter() - start_time
 
@@ -129,11 +135,10 @@ def main() -> None:
         "--provider",
         default="lm-studio",
         choices=["lm-studio", "ollama", "llama.cpp"],
-        help="AI provider to use for OCR (default: lm-studio)"
+        help="AI provider to use for OCR (default: lm-studio)",
     )
     parser.add_argument(
-        "--provider-url",
-        help="Custom provider URL (default depends on provider type)"
+        "--provider-url", help="Custom provider URL (default depends on provider type)"
     )
     parser.add_argument(
         "--model",
@@ -157,7 +162,9 @@ def main() -> None:
         print(f"Error: PDF file '{pdf_path}' does not exist")
         sys.exit(1)
 
-    process_pdf_to_markdown(pdf_path, output_md_path, provider_type, model, provider_url, dpi)
+    process_pdf_to_markdown(
+        pdf_path, output_md_path, provider_type, model, provider_url, dpi
+    )
     print(f"\nMarkdown output saved to {output_md_path}")
 
 
