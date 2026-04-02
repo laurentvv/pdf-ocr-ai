@@ -1,11 +1,15 @@
-"""
-Basic tests to validate the multi-provider functionality
-"""
-import argparse
 import sys
+from unittest.mock import MagicMock
+
+# Mock dependencies
+sys.modules["fitz"] = MagicMock()
+sys.modules["tqdm"] = MagicMock()
+sys.modules["openai"] = MagicMock()
+
+import argparse
 import os
 # Add the src directory to the path so we can import the module
-sys.path.insert(0, os.path.join(os.path.dirname(__file__), '..', '..'))
+sys.path.insert(0, os.path.join(os.path.dirname(__file__), '..'))
 
 from pdf_ocr_ai.providers import get_provider, LMStudioProvider, OllamaProvider, LlamaCppProvider
 
