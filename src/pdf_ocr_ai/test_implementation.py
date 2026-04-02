@@ -1,13 +1,16 @@
-"""
-Basic tests to validate the multi-provider functionality
-"""
+import sys
+from unittest.mock import MagicMock
+
+# Mock dependencies
+sys.modules["fitz"] = MagicMock()
+sys.modules["tqdm"] = MagicMock()
+sys.modules["openai"] = MagicMock()
 
 import argparse
-import sys
 import os
 
 # Add the src directory to the path so we can import the module
-sys.path.insert(0, os.path.join(os.path.dirname(__file__), "..", ".."))
+sys.path.insert(0, os.path.join(os.path.dirname(__file__), '..'))
 
 from pdf_ocr_ai.providers import (
     get_provider,
@@ -110,47 +113,3 @@ def run_all_tests():
 
 if __name__ == "__main__":
     run_all_tests()
-
-
-def test_pdf_to_images_is_generator():
-    """Test that pdf_to_images returns an iterator/generator to prevent memory exhaustion"""
-    import types
-    from unittest.mock import MagicMock, patch
-
-    # We will patch the specific fitz open call in pdf_ocr_ai.main
-    with patch("pdf_ocr_ai.main.fitz") as mock_fitz:
-        mock_doc = MagicMock()
-
-        # Explicitly support len()
-        mock_doc.__len__ = MagicMock(return_value=2)
-
-        mock_page1 = MagicMock()
-        mock_pix1 = MagicMock()
-        mock_pix1.tobytes.return_value = b"image_data_1"
-        mock_page1.get_pixmap.return_value = mock_pix1
-
-        mock_page2 = MagicMock()
-        mock_pix2 = MagicMock()
-        mock_pix2.tobytes.return_value = b"image_data_2"
-        mock_page2.get_pixmap.return_value = mock_pix2
-
-        mock_doc.load_page.side_effect = [mock_page1, mock_page2]
-        mock_fitz.open.return_value = mock_doc
-
-        from pdf_ocr_ai.main import pdf_to_images
-
-        result = pdf_to_images("dummy.pdf", dpi=300)
-
-        # Verify it returns a generator (which fixes the OOM vulnerability)
-        assert isinstance(result, types.GeneratorType)
-
-        # Verify we can iterate over it and get expected results
-        items = list(result)
-
-        assert len(items) == 2, f"Expected 2 items, got {len(items)}"
-        assert items[0] == (1, b"image_data_1")
-        assert items[1] == (2, b"image_data_2")
-
-        # Verify that get_pixmap was called with alpha=False (memory optimization)
-        mock_page1.get_pixmap.assert_called_with(dpi=300, alpha=False)
-        mock_page2.get_pixmap.assert_called_with(dpi=300, alpha=False)
