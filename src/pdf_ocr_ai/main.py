@@ -8,7 +8,7 @@ import argparse
 import sys
 import time
 from pathlib import Path
-from typing import Generator, List, Tuple
+from typing import Generator, Tuple
 
 import fitz  # PyMuPDF
 from tqdm import tqdm
