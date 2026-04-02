@@ -133,7 +133,7 @@ class OpenAICompatibleProvider(AIProvider):
                 return content
 
             except Exception as e:
-                logger.warning(f"Attempt {attempt + 1} failed for model {model}: {e}")
+                logger.warning(f"Attempt {attempt + 1} failed for model {model}: {type(e).__name__}")
                 if attempt < max_retries - 1:
                     time.sleep(2**attempt)  # Exponential backoff
                 else:
