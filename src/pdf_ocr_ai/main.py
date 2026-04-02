@@ -8,7 +8,7 @@ import argparse
 import sys
 import time
 from pathlib import Path
-from typing import List, Tuple
+from typing import Generator, List, Tuple
 
 import fitz  # PyMuPDF
 from tqdm import tqdm
@@ -16,27 +16,25 @@ from tqdm import tqdm
 from .providers import get_provider
 
 
-def pdf_to_images(pdf_path: str, dpi: int = 300) -> List[Tuple[int, bytes]]:
-    """Convert PDF pages to PNG images in memory.
+def pdf_to_images(pdf_path: str, dpi: int = 300) -> Generator[Tuple[int, bytes], None, None]:
+    """Convert PDF pages to PNG images as a generator.
 
     Args:
         pdf_path: Path to the input PDF file
         dpi: Resolution for image conversion (default: 300)
 
-    Returns:
-        List of tuples containing (page_number, image_bytes) for each page
+    Yields:
+        Tuples containing (page_number, image_bytes) for each page
     """
     doc = fitz.open(pdf_path)
-    images = []
-    for page_num in range(len(doc)):
-        page = doc.load_page(page_num)
-        pix = page.get_pixmap(dpi=dpi)  # Higher DPI for better OCR accuracy
-        img_data = pix.tobytes("png")
-        images.append(
-            (page_num + 1, img_data)
-        )  # Page number (1-indexed) and image bytes
-    doc.close()
-    return images
+    try:
+        for page_num in range(len(doc)):
+            page = doc.load_page(page_num)
+            pix = page.get_pixmap(dpi=dpi)  # Higher DPI for better OCR accuracy
+            img_data = pix.tobytes("png")
+            yield (page_num + 1, img_data)  # Page number (1-indexed) and image bytes
+    finally:
+        doc.close()
 
 
 def process_pdf_to_markdown(
@@ -61,10 +59,14 @@ def process_pdf_to_markdown(
     # Initialize the appropriate provider
     provider = get_provider(provider_type, base_url=provider_url)
 
-    images = pdf_to_images(pdf_path, dpi)
-    total_pages = len(images)
+    # Get total pages before starting processing
+    doc = fitz.open(pdf_path)
+    total_pages = len(doc)
+    doc.close()
 
     print(f"Starting OCR processing for {total_pages} pages...")
+
+    images = pdf_to_images(pdf_path, dpi)
 
     with open(output_md_path, "w", encoding="utf-8") as md_file:
         md_file.write(f"# OCR Extracted Content from {Path(pdf_path).name}\n\n")
