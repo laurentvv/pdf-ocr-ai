@@ -8,10 +8,16 @@ sys.modules["openai"] = MagicMock()
 
 import argparse
 import os
+
 # Add the src directory to the path so we can import the module
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), '..'))
 
-from pdf_ocr_ai.providers import get_provider, LMStudioProvider, OllamaProvider, LlamaCppProvider
+from pdf_ocr_ai.providers import (
+    get_provider,
+    LMStudioProvider,
+    OllamaProvider,
+    LlamaCppProvider,
+)
 
 
 def test_provider_creation():
@@ -58,18 +64,15 @@ def test_argument_parsing():
     print("Testing argument parsing...")
 
     # Test the argument parser
-    parser = argparse.ArgumentParser(
-        description="Test argument parsing"
-    )
+    parser = argparse.ArgumentParser(description="Test argument parsing")
     parser.add_argument(
         "--provider",
         default="lm-studio",
         choices=["lm-studio", "ollama", "llama.cpp"],
-        help="AI provider to use for OCR (default: lm-studio)"
+        help="AI provider to use for OCR (default: lm-studio)",
     )
     parser.add_argument(
-        "--provider-url",
-        help="Custom provider URL (default depends on provider type)"
+        "--provider-url", help="Custom provider URL (default depends on provider type)"
     )
     parser.add_argument(
         "--model",
@@ -81,11 +84,7 @@ def test_argument_parsing():
     )
 
     # Parse some test arguments
-    test_args = [
-        "--provider", "ollama",
-        "--model", "llava",
-        "--dpi", "200"
-    ]
+    test_args = ["--provider", "ollama", "--model", "llava", "--dpi", "200"]
 
     parsed = parser.parse_args(test_args)
     assert parsed.provider == "ollama"
@@ -107,7 +106,9 @@ def run_all_tests():
     test_argument_parsing()
     print()
 
-    print("🎉 All tests passed! The multi-provider implementation is working correctly.")
+    print(
+        "🎉 All tests passed! The multi-provider implementation is working correctly."
+    )
 
 
 if __name__ == "__main__":
