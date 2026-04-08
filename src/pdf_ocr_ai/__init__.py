@@ -6,8 +6,15 @@ This package provides OCR capabilities using multiple AI providers:
 - Ollama
 - llama.cpp
 """
+
 from .main import main
-from .providers import get_provider, AIProvider, LMStudioProvider, OllamaProvider, LlamaCppProvider
+from .providers import (
+    get_provider,
+    AIProvider,
+    LMStudioProvider,
+    OllamaProvider,
+    LlamaCppProvider,
+)
 
 __all__ = [
     "main",
@@ -15,5 +22,5 @@ __all__ = [
     "AIProvider",
     "LMStudioProvider",
     "OllamaProvider",
-    "LlamaCppProvider"
+    "LlamaCppProvider",
 ]
