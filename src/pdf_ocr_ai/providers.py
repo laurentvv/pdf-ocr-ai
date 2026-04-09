@@ -14,12 +14,16 @@ logger = logging.getLogger(__name__)
 
 # OCR prompt reused across all providers
 OCR_PROMPT = """
-Perform OCR on this image (which is a PDF page). Extract all raw text verbatim.
-If there are UI screenshots or interface elements (like buttons, menus, windows, code snippets), describe them in detail:
-- Identify UI components (e.g., buttons, text fields, icons).
-- Extract any text from UI elements.
-- Describe layouts, hierarchies, and any visible interactions.
-Output in structured Markdown: Use # for page header, ## for sections like 'Raw Text' and 'UI Descriptions'.
+Perform OCR on this image (which is a PDF page). Extract all text verbatim.
+Preserve the exact reading order and document structure.
+- If there are tables, extract them as proper Markdown tables.
+- If there are mathematical formulas, extract them as LaTeX formulas enclosed in $$...$$ for block formulas or $...$ for inline formulas.
+- If there are UI screenshots, charts, or images, describe them in detail:
+  - Identify UI components (e.g., buttons, text fields, icons).
+  - Extract any text from UI elements.
+  - Describe layouts, hierarchies, and any visible interactions.
+  - For charts, describe the axes, legends, and key data trends.
+Output in structured Markdown: Use # for page header, ## for sections.
 Keep it concise but comprehensive.
 All responses must be in French as the document is in French.
 """
@@ -133,7 +137,9 @@ class OpenAICompatibleProvider(AIProvider):
                 return content
 
             except Exception as e:
-                logger.warning(f"Attempt {attempt + 1} failed for model {model}: {type(e).__name__}")
+                logger.warning(
+                    f"Attempt {attempt + 1} failed for model {model}: {type(e).__name__}"
+                )
                 if attempt < max_retries - 1:
                     time.sleep(2**attempt)  # Exponential backoff
                 else:

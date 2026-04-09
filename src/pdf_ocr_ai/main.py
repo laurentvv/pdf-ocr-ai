@@ -9,7 +9,7 @@ import argparse
 import sys
 import time
 from pathlib import Path
-from typing import Generator, Tuple
+from typing import Generator, Tuple, Union
 
 import fitz  # PyMuPDF
 from tqdm import tqdm
@@ -17,25 +17,30 @@ from tqdm import tqdm
 from .providers import get_provider
 
 
-def pdf_to_images(pdf_path: str, dpi: int = 300) -> Generator[Tuple[int, bytes], None, None]:
-    """Convert PDF pages to PNG images as a generator.
+def page_needs_ocr(page: fitz.Page) -> bool:
+    """Determine if a PDF page requires AI OCR processing based on its content.
 
     Args:
-        pdf_path: Path to the input PDF file
-        dpi: Resolution for image conversion (default: 300)
+        page: The PyMuPDF page object
 
-    Yields:
-        Tuples containing (page_number, image_bytes) for each page
+    Returns:
+        True if the page needs OCR (has images, drawings, or very little text), False otherwise.
     """
-    doc = fitz.open(pdf_path)
-    try:
-        for page_num in range(len(doc)):
-            page = doc.load_page(page_num)
-            pix = page.get_pixmap(dpi=dpi)  # Higher DPI for better OCR accuracy
-            img_data = pix.tobytes("png")
-            yield (page_num + 1, img_data)  # Page number (1-indexed) and image bytes
-    finally:
-        doc.close()
+    # Check for images
+    if len(page.get_images(full=True)) > 0:
+        return True
+
+    # Check for drawings/vector graphics
+    if len(page.get_drawings()) > 0:
+        return True
+
+    # Check text density. If there's very little text, it might be a scanned image
+    # without proper text layers, or just an empty page (which AI can describe or skip).
+    text = page.get_text()
+    if len(text.strip()) < 50:
+        return True
+
+    return False
 
 
 def process_pdf_to_markdown(
@@ -47,6 +52,7 @@ def process_pdf_to_markdown(
     dpi: int = 300,
 ) -> None:
     """Main function to process PDF and generate Markdown with progress tracking.
+    Uses a hybrid approach: local extraction for simple text pages, AI OCR for complex ones.
 
     Args:
         pdf_path: Path to the input PDF file
@@ -64,14 +70,10 @@ def process_pdf_to_markdown(
     # Initialize the appropriate provider
     provider = get_provider(provider_type, base_url=provider_url)
 
-    # Get total pages before starting processing
     doc = fitz.open(pdf_path)
     total_pages = len(doc)
-    doc.close()
 
-    print(f"Starting OCR processing for {total_pages} pages...")
-
-    images = pdf_to_images(pdf_path, dpi)
+    print(f"Starting hybrid extraction processing for {total_pages} pages...")
 
     with open(output_md_path, "w", encoding="utf-8") as md_file:
         md_file.write(f"# OCR Extracted Content from {Path(pdf_path).name}\n\n")
@@ -82,16 +84,33 @@ def process_pdf_to_markdown(
         )
 
         try:
-            for page_num, img_bytes in images:
+            for page_num in range(total_pages):
                 page_start_time = time.perf_counter()
-                ocr_result = provider.ocr_image(img_bytes, model)
-                page_end_time = time.perf_counter()
+                page = doc.load_page(page_num)
 
-                # Calculate page processing time
+                md_file.write(f"## Page {page_num + 1}\n\n")
+
+                # Hybrid Decision Logic
+                if page_needs_ocr(page):
+                    # Complex page -> use AI Vision
+                    method = "AI OCR"
+                    pix = page.get_pixmap(dpi=dpi, alpha=False)
+                    img_bytes = pix.tobytes("png")
+                    result = provider.ocr_image(img_bytes, model)
+                else:
+                    # Simple text page -> use local fast extraction
+                    method = "Local"
+                    # Try to get markdown if supported by the fitz version, else fallback to text
+                    try:
+                        result = page.get_text("markdown")
+                    except ValueError:
+                        # Fallback for older PyMuPDF versions
+                        result = page.get_text("text")
+
+                page_end_time = time.perf_counter()
                 page_time = page_end_time - page_start_time
 
-                md_file.write(f"## Page {page_num}\n\n")
-                md_file.write(ocr_result + "\n\n---\n\n")
+                md_file.write(result + "\n\n---\n\n")
 
                 # Update progress bar with page processing info
                 progress_bar.update(1)
@@ -102,12 +121,14 @@ def process_pdf_to_markdown(
                 )
                 progress_bar.set_postfix(
                     {
+                        "Method": method,
                         "Page Time": f"{page_time:.2f}s",
                         "Avg Time": f"{current_avg_time:.2f}s",
                     }
                 )
         finally:
             progress_bar.close()
+            doc.close()
 
     total_time = time.perf_counter() - start_time
 
