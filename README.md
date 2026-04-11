@@ -218,6 +218,80 @@ pdf-ocr-ai document.pdf output.md --provider ollama --model llava
 
 </div>
 
+## 📦 Usage as a Python Module
+
+You can easily integrate `pdf-ocr-ai` directly into your own Python applications. The library exposes a `convert_pdf_to_markdown` function that handles the extraction and returns the processed Markdown text as a string.
+
+### Basic Example
+
+```python
+from pdf_ocr_ai import convert_pdf_to_markdown
+
+# Extract text using LM Studio (default)
+markdown_content = convert_pdf_to_markdown("document.pdf")
+
+print(markdown_content)
+```
+
+### Advanced Configuration
+
+You can customize the AI provider, the model, and enable a progress bar if desired.
+
+```python
+from pdf_ocr_ai import convert_pdf_to_markdown
+
+markdown_content = convert_pdf_to_markdown(
+    pdf_path="document.pdf",
+    provider_type="ollama",          # "lm-studio", "ollama", or "llama.cpp"
+    model="llava",                   # The vision model to use
+    provider_url="http://localhost:11434/v1", # Custom URL if needed
+    dpi=300,                         # Resolution for images
+    show_progress=True               # Show a tqdm progress bar in the console
+)
+
+# Save the result to a file manually
+with open("extracted_document.md", "w", encoding="utf-8") as f:
+    f.write(markdown_content)
+```
+
+## 🚀 Publishing to PyPI
+
+If you want to publish your own fork or updates of this package to PyPI (Python Package Index), `pdf-ocr-ai` is fully configured for it via `pyproject.toml`.
+
+### Prerequisites
+- Create an account on [PyPI](https://pypi.org/) (or [TestPyPI](https://test.pypi.org/) for testing).
+- Generate an API Token in your PyPI account settings.
+
+### Step 1: Build the Package
+
+Use `uv` (recommended) or `build` to generate the distribution archives (`.tar.gz` and `.whl`):
+
+```bash
+# Using uv (fastest)
+uv build
+
+# Or using the standard build module
+pip install build
+python -m build
+```
+This will create a `dist/` directory containing the distribution files.
+
+### Step 2: Upload to PyPI
+
+Use `twine` to securely upload the package:
+
+```bash
+# Install twine if you haven't already
+pip install twine
+
+# Check that the distribution files are valid
+twine check dist/*
+
+# Upload to PyPI
+twine upload dist/*
+```
+You will be prompted for your username (`__token__`) and your API password/token.
+
 ## Setup AI Providers
 
 ### Setup LM Studio

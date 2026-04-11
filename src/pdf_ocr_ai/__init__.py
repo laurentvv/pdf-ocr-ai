@@ -7,7 +7,7 @@ This package provides OCR capabilities using multiple AI providers:
 - llama.cpp
 """
 
-from .main import main
+from .main import main, convert_pdf_to_markdown, process_pdf_to_markdown
 from .providers import (
     get_provider,
     AIProvider,
@@ -18,6 +18,8 @@ from .providers import (
 
 __all__ = [
     "main",
+    "convert_pdf_to_markdown",
+    "process_pdf_to_markdown",
     "get_provider",
     "AIProvider",
     "LMStudioProvider",
