@@ -43,6 +43,91 @@ def page_needs_ocr(page: fitz.Page) -> bool:
     return False
 
 
+def convert_pdf_to_markdown(
+    pdf_path: str,
+    provider_type: str = "lm-studio",
+    model: str = "qwen/qwen3-vl-30b",
+    provider_url: str = None,
+    dpi: int = 300,
+    show_progress: bool = False,
+) -> str:
+    """Extract text and images from a PDF and convert to Markdown.
+
+    This function processes a PDF using a hybrid approach: local text extraction
+    for simple pages, and AI OCR for complex ones containing images or drawings.
+
+    Args:
+        pdf_path: Path to the input PDF file
+        provider_type: AI provider to use (default: "lm-studio")
+        model: Model to use with the provider (default: "qwen/qwen3-vl-30b")
+        provider_url: Custom provider URL (default: None)
+        dpi: Resolution for image conversion (default: 300)
+        show_progress: Whether to display a progress bar (default: False)
+
+    Returns:
+        The extracted content in Markdown format
+    """
+    start_time = time.perf_counter()
+    provider = get_provider(provider_type, base_url=provider_url)
+
+    doc = fitz.open(pdf_path)
+    total_pages = len(doc)
+
+    markdown_output = []
+    markdown_output.append(f"# OCR Extracted Content from {Path(pdf_path).name}\n\n")
+
+    progress_bar = None
+    if show_progress:
+        progress_bar = tqdm(
+            total=total_pages, desc="Processing pages", unit="page", leave=True
+        )
+
+    try:
+        for page_num in range(total_pages):
+            page_start_time = time.perf_counter()
+            page = doc.load_page(page_num)
+
+            markdown_output.append(f"## Page {page_num + 1}\n\n")
+
+            if page_needs_ocr(page):
+                method = "AI OCR"
+                pix = page.get_pixmap(dpi=dpi, alpha=False)
+                img_bytes = pix.tobytes("png")
+                result = provider.ocr_image(img_bytes, model)
+            else:
+                method = "Local"
+                try:
+                    result = page.get_text("markdown")
+                except ValueError:
+                    result = page.get_text("text")
+
+            page_end_time = time.perf_counter()
+            page_time = page_end_time - page_start_time
+
+            markdown_output.append(result + "\n\n---\n\n")
+
+            if progress_bar:
+                progress_bar.update(1)
+                current_avg_time = (
+                    (time.perf_counter() - start_time) / progress_bar.n
+                    if progress_bar.n > 0
+                    else 0
+                )
+                progress_bar.set_postfix(
+                    {
+                        "Method": method,
+                        "Page Time": f"{page_time:.2f}s",
+                        "Avg Time": f"{current_avg_time:.2f}s",
+                    }
+                )
+    finally:
+        if progress_bar:
+            progress_bar.close()
+        doc.close()
+
+    return "".join(markdown_output)
+
+
 def process_pdf_to_markdown(
     pdf_path: str,
     output_md_path: str,
@@ -65,75 +150,37 @@ def process_pdf_to_markdown(
     Returns:
         None (writes output to specified file)
     """
-    start_time = time.perf_counter()
-
-    # Initialize the appropriate provider
-    provider = get_provider(provider_type, base_url=provider_url)
-
-    doc = fitz.open(pdf_path)
-    total_pages = len(doc)
+    try:
+        # Get total pages just for the summary print
+        doc = fitz.open(pdf_path)
+        total_pages = len(doc)
+        doc.close()
+    except Exception as e:
+        print(f"Error opening PDF: {e}")
+        return
 
     print(f"Starting hybrid extraction processing for {total_pages} pages...")
 
+    start_time = time.perf_counter()
+
+    # Extract markdown using the library function
+    markdown_content = convert_pdf_to_markdown(
+        pdf_path=pdf_path,
+        provider_type=provider_type,
+        model=model,
+        provider_url=provider_url,
+        dpi=dpi,
+        show_progress=True,
+    )
+
+    # Write to output file
     with open(output_md_path, "w", encoding="utf-8") as md_file:
-        md_file.write(f"# OCR Extracted Content from {Path(pdf_path).name}\n\n")
-
-        # Initialize progress bar
-        progress_bar = tqdm(
-            total=total_pages, desc="Processing pages", unit="page", leave=True
-        )
-
-        try:
-            for page_num in range(total_pages):
-                page_start_time = time.perf_counter()
-                page = doc.load_page(page_num)
-
-                md_file.write(f"## Page {page_num + 1}\n\n")
-
-                # Hybrid Decision Logic
-                if page_needs_ocr(page):
-                    # Complex page -> use AI Vision
-                    method = "AI OCR"
-                    pix = page.get_pixmap(dpi=dpi, alpha=False)
-                    img_bytes = pix.tobytes("png")
-                    result = provider.ocr_image(img_bytes, model)
-                else:
-                    # Simple text page -> use local fast extraction
-                    method = "Local"
-                    # Try to get markdown if supported by the fitz version, else fallback to text
-                    try:
-                        result = page.get_text("markdown")
-                    except ValueError:
-                        # Fallback for older PyMuPDF versions
-                        result = page.get_text("text")
-
-                page_end_time = time.perf_counter()
-                page_time = page_end_time - page_start_time
-
-                md_file.write(result + "\n\n---\n\n")
-
-                # Update progress bar with page processing info
-                progress_bar.update(1)
-                current_avg_time = (
-                    (time.perf_counter() - start_time) / progress_bar.n
-                    if progress_bar.n > 0
-                    else 0
-                )
-                progress_bar.set_postfix(
-                    {
-                        "Method": method,
-                        "Page Time": f"{page_time:.2f}s",
-                        "Avg Time": f"{current_avg_time:.2f}s",
-                    }
-                )
-        finally:
-            progress_bar.close()
-            doc.close()
+        md_file.write(markdown_content)
 
     total_time = time.perf_counter() - start_time
 
     # Calculate and display performance metrics
-    avg_time_per_page = total_time / total_pages
+    avg_time_per_page = total_time / total_pages if total_pages > 0 else 0
     pages_per_second = total_pages / total_time if total_time > 0 else 0
 
     print("\nProcessing completed!")
